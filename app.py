@@ -1,3 +1,4 @@
+﻿import os
 from flask import Flask
 from config import Config
 from models import db
@@ -12,7 +13,6 @@ def create_app(config_class=Config):
     login_manager = LoginManager(app)
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'info'
-    
 
     from models import User
 
@@ -34,4 +34,5 @@ if __name__ == '__main__':
     app = create_app()
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
