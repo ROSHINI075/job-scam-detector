@@ -1,0 +1,125 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 text-center mb-5">
+            <h1 class="hero-title animate-fade-in">Analysis <span class="accent-text">Results</span></h1>
+            <p class="text-secondary">Resume strength for <strong>{{ role }}</strong></p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="glass-card p-5 animate-fade-in">
+                <div class="row align-items-center mb-5">
+                    <div class="col-md-4 text-center">
+                        <div class="position-relative d-inline-block">
+                            <canvas id="scoreChart" width="180" height="180" data-score="{{ score }}"></canvas>
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <h2 class="fw-bold mb-0">{{ score|int }}%</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <h3 class="fw-bold mb-3">Resume Strength:
+                            {% if score >= 80 %}
+                            <span class="text-success">Strong</span>
+                            {% elif score >= 50 %}
+                            <span class="text-warning">Moderate</span>
+                            {% else %}
+                            <span class="text-danger">Needs Improvement</span>
+                            {% endif %}
+                        </h3>
+                        <p class="text-secondary">Based on our analysis, your resume covers {{ found_skills|length }}
+                            out of {{ (found_skills|length + missing_skills|length) }} key skills for this role.</p>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-check-circle text-success me-2"></i>Matched Skills
+                        </h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for skill in found_skills %}
+                            <span
+                                class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">{{
+                                skill|capitalize }}</span>
+                            {% endfor %}
+                            {% if not found_skills %}
+                            <p class="text-secondary small">No specific keywords matched.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-times-circle text-danger me-2"></i>Missing Skills</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for skill in missing_skills %}
+                            <span
+                                class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill">{{
+                                skill|capitalize }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-5 border-secondary">
+
+                <div class="mt-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-lightbulb text-warning me-2"></i>Suggestions for
+                        Improvement</h5>
+                    <ul class="list-group list-group-flush bg-transparent">
+                        {% for suggestion in suggestions %}
+                        <li
+                            class="list-group-item bg-transparent text-white border-secondary px-0 py-3 d-flex align-items-start gap-3">
+                            <i class="fas fa-chevron-right text-accent mt-1"></i>
+                            {{ suggestion }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a href="{{ url_for('ml.resume_analysis') }}" class="btn btn-outline-light px-5">
+                        <i class="fas fa-arrow-left me-2"></i>Analyze Another
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const canvas = document.getElementById('scoreChart');
+    const ctx = canvas.getContext('2d');
+    const score = parseFloat(canvas.dataset.score);
+
+    let color = '#ef4444'; // Red
+    if (score >= 80) color = '#10b981'; // Green
+    else if (score >= 50) color = '#f59e0b'; // Amber
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [score, 100 - score],
+                backgroundColor: [color, 'rgba(255, 255, 255, 0.05)'],
+                borderWidth: 0,
+                circumference: 360,
+                rotation: 0,
+                cutout: '85%'
+            }]
+        },
+        options: {
+            responsive: false,
+            plugins: {
+                tooltip: { enabled: false },
+                legend: { display: false }
+            }
+        }
+    });
+</script>
+{% endblock %}

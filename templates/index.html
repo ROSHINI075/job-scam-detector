@@ -1,0 +1,153 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 animate-fade-in">
+                <h1 class="hero-title">Protect Your Career from <span class="accent-text">Scams</span></h1>
+                <p class="lead mb-4 text-secondary">AI-powered recruitment analysis to detect fake job offers. Upload
+                    descriptions or images and get instant verification results.</p>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Start Scanning Free</a>
+                    <a href="#features" class="btn btn-outline-light btn-lg">How it Works</a>
+                </div>
+            </div>
+            <div class="col-lg-6 mt-5 mt-lg-0 text-center animate-fade-in" style="animation-delay: 0.2s;">
+                <div class="glass-card p-4 mx-auto" style="max-width: 450px;">
+                    <div class="p-5 bg-dark rounded-circle d-inline-block mb-4"
+                        style="border: 4px solid var(--accent-color);">
+                        <i class="fas fa-fingerprint fa-5x text-info"></i>
+                    </div>
+                    <h4>Smart Analysis</h4>
+                    <p class="text-secondary">Detecting anomalies in thousands of job postings daily.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="features" class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Powerful AI Modules</h2>
+            <p class="text-secondary">Comprehensive tools to keep you safe</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="glass-card p-4 h-100 text-center">
+                    <i class="fas fa-file-alt fa-3x mb-3 text-info"></i>
+                    <h5 class="fw-bold">Text Analysis</h5>
+                    <p class="text-secondary small">Analyze job description text for linguistic patterns of scams using
+                        NLP.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card p-4 h-100 text-center">
+                    <i class="fas fa-image fa-3x mb-3 text-info"></i>
+                    <h5 class="fw-bold">Image Analysis</h5>
+                    <p class="text-secondary small">Upload screenshots of job offers. Our AI extracts text and analyzes
+                        it instantly.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card p-4 h-100 text-center">
+                    <i class="fas fa-comments fa-3x mb-3 text-info"></i>
+                    <h5 class="fw-bold">AI Chatbot</h5>
+                    <p class="text-secondary small">Enquire about suspicious offers with our intelligent assistant in
+                        real-time.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- AI Chatbot Trigger -->
+<div class="position-fixed bottom-0 end-0 m-4" style="z-index: 1050;">
+    <button class="btn btn-primary rounded-circle p-3 shadow-lg" data-bs-toggle="modal" data-bs-target="#chatbotModal">
+        <i class="fas fa-robot fa-2x"></i>
+    </button>
+</div>
+
+<!-- Chatbot Modal -->
+<div class="modal fade" id="chatbotModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-0">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title"><i class="fas fa-robot me-2"></i>ScamShield Assistant</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-dark" style="height: 400px; overflow-y: auto;">
+                <div class="mb-3">
+                    <div class="bg-secondary p-2 rounded-3 d-inline-block small max-width-75">
+                        Hello! I am your AI Career Shield. How can I help you today?
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <div class="input-group">
+                    <input type="text" class="form-control bg-dark border-secondary text-white"
+                        placeholder="Ask about a job offer...">
+                    <button class="btn btn-primary btn-send-chat"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sendBtn = document.querySelector('.btn-send-chat');
+        const chatInput = document.querySelector('#chatbotModal input');
+        let currentContext = null;
+
+        if (sendBtn && chatInput) {
+            const sendMessage = () => {
+                const message = chatInput.value.trim();
+                if (!message) return;
+
+                const modalBody = document.querySelector('#chatbotModal .modal-body');
+
+                // Append User Message
+                const userDiv = document.createElement('div');
+                userDiv.className = 'text-end mb-3';
+                userDiv.innerHTML = `<div class="bg-primary p-2 rounded-3 d-inline-block small text-white max-width-75 text-start">${message}</div>`;
+                modalBody.appendChild(userDiv);
+
+                chatInput.value = '';
+                modalBody.scrollTop = modalBody.scrollHeight;
+
+                fetch('/chatbot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        context: currentContext
+                    })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        currentContext = data.context;
+                        const aiDiv = document.createElement('div');
+                        aiDiv.className = 'mb-3';
+                        aiDiv.innerHTML = `<div class="bg-secondary p-2 rounded-3 d-inline-block small max-width-75">${data.response}</div>`;
+                        modalBody.appendChild(aiDiv);
+                        modalBody.scrollTop = modalBody.scrollHeight;
+                    })
+                    .catch(err => {
+                        console.error('Chat error:', err);
+                    });
+            };
+
+            sendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

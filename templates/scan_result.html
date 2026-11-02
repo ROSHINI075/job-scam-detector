@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 text-center mb-5">
+            <h1 class="hero-title animate-fade-in">Scan <span class="accent-text">Result</span></h1>
+            <p class="text-secondary">Detailed breakdown of the AI analysis for your job offer.</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="glass-card p-5 animate-fade-in">
+                <div class="row g-5 align-items-center">
+                    <div class="col-md-5 text-center">
+                        <div class="position-relative d-inline-block mb-4">
+                            <canvas id="resultChart" width="200" height="200"
+                                data-confidence="{{ (scan.confidence * 100)|round(0)|int }}"
+                                data-result="{{ scan.result }}"></canvas>
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <h2 class="fw-bold mb-0">{{ (scan.confidence * 100)|round(0)|int }}%</h2>
+                                <p class="small text-secondary mb-0">Confidence</p>
+                            </div>
+                        </div>
+                        <div
+                            class="alert alert-{{ 'danger' if scan.result == 'Fake' else 'success' }} border-0 shadow-sm">
+                            <h4 class="alert-heading fw-bold mb-0">
+                                <i
+                                    class="fas fa-{{ 'exclamation-triangle' if scan.result == 'Fake' else 'check-circle' }} me-2"></i>
+                                Analysis: {{ scan.result }}
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <h4 class="fw-bold mb-4">Risk Assessment</h4>
+                        <p class="text-secondary mb-4">
+                            Our AI model analyzed the provided information against common recruitment scam patterns.
+                            {% if scan.result == 'Fake' %}
+                            This job offer shows significant red flags and is highly likely to be a scam.
+                            {% else %}
+                            This job offer appears to be legitimate based on our current data.
+                            {% endif %}
+                        </p>
+
+                        <ul class="list-group list-group-flush bg-transparent mb-4">
+                            <li class="list-group-item bg-transparent text-white border-secondary px-0 py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-hashtag me-2 text-accent"></i> Scan Title</span>
+                                    <span class="fw-bold">{{ scan.title }}</span>
+                                </div>
+                            </li>
+                            <li class="list-group-item bg-transparent text-white border-secondary px-0 py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-calendar-alt me-2 text-accent"></i> Date Performed</span>
+                                    <span class="text-secondary">{{ scan.timestamp.strftime('%B %d, %Y') }}</span>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <div class="d-grid gap-2 d-md-flex mt-4">
+                            <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-light flex-grow-1">
+                                <i class="fas fa-th-large me-2"></i>Go to Dashboard
+                            </a>
+                            <a href="{{ url_for('main.new_scan') }}" class="btn btn-primary flex-grow-1">
+                                <i class="fas fa-redo me-2"></i>New Scan
+                            </a>
+                        </div>
+
+                        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                        <script>
+                            const canvas = document.getElementById('resultChart');
+                            const ctx = canvas.getContext('2d');
+                            const confidence = parseFloat(canvas.dataset.confidence);
+                            const isFake = canvas.dataset.result === 'Fake';
+                            const color = isFake ? '#ef4444' : '#10b981';
+
+                            new Chart(ctx, {
+                                type: 'doughnut',
+                                data: {
+                                    datasets: [{
+                                        data: [confidence, 100 - confidence],
+                                        backgroundColor: [color, 'rgba(255, 255, 255, 0.05)'],
+                                        borderWidth: 0,
+                                        circumference: 360,
+                                        rotation: 0,
+                                        cutout: '85%'
+                                    }]
+                                },
+                                options: {
+                                    responsive: false,
+                                    plugins: {
+                                        tooltip: { enabled: false },
+                                        legend: { display: false }
+                                    }
+                                }
+                            });
+                        </script>
+                        {% endblock %}

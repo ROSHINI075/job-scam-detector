@@ -1,0 +1,13 @@
+flask
+flask-sqlalchemy
+flask-login
+werkzeug
+scikit-learn
+pandas
+numpy
+pytesseract
+Pillow
+flask-migrate
+python-dotenv
+pdfminer.six
+python-docx

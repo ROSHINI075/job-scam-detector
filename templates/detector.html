@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="glass-card p-5 animate-fade-in">
+                <h2 class="fw-bold mb-4 text-center">AI Scam Detector</h2>
+                <p class="text-secondary text-center mb-5">Analyze job descriptions using text or image analysis</p>
+
+                <form action="{{ url_for('ml.detect') }}" method="POST" enctype="multipart/form-data">
+
+                    <ul class="nav nav-pills mb-4 bg-dark p-1 rounded" id="pills-tab" role="tablist">
+                        <li class="nav-item flex-fill" role="presentation">
+                            <button class="nav-link active w-100" id="pills-text-tab" data-bs-toggle="pill"
+                                data-bs-target="#pills-text" type="button">Text Analysis</button>
+                        </li>
+                        <li class="nav-item flex-fill" role="presentation">
+                            <button class="nav-link w-100" id="pills-image-tab" data-bs-toggle="pill"
+                                data-bs-target="#pills-image" type="button">Image Analysis</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="pills-tabContent">
+                        <div class="tab-pane fade show active" id="pills-text">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Job Description Text</label>
+                                <textarea name="description" class="form-control bg-dark border-secondary text-white"
+                                    rows="8"
+                                    placeholder="Paste the full job description here...">{{ scan.content if scan else '' }}</textarea>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="pills-image">
+                            <div class="mb-4 text-center p-5 border-2 border-dashed border-secondary rounded">
+                                <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-secondary"></i>
+                                <h6>Upload Job Poster or Screenshot</h6>
+                                <p class="small text-secondary">Drag and drop or click to browse (PNG, JPG)</p>
+                                <input type="file" name="job_image"
+                                    class="form-control bg-dark border-secondary text-white d-none" id="imageUpload">
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                    onclick="document.getElementById('imageUpload').click()">Select Image</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">Run AI Verification</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
